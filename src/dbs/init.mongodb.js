@@ -1,9 +1,9 @@
-'use strict';
-
 const mongoose = require('mongoose');
-
-const connectSting = `mongodb://0.0.0.0:27017/shopDev`
+const { db: { host, name, port } } = require('../configs/config.mongodb')
+const connectSting = `mongodb://${host}:${port}/${name}`
 const { countConnect } = require('../helpers/check.connect')
+
+console.log(connectSting);
 
 class Database {
     constructor() {
