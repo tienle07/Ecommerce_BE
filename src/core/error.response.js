@@ -1,11 +1,11 @@
 const StatusCode = {
-    FORBIDDEN: '403',
-    CONFLICT: '409,'
+    FORBIDDEN: 403,
+    CONFLICT: 409
 }
 
 const ReasonStatusCode = {
     FORBIDDEN: 'Bad request error',
-    CONFLICT: 'Conflect error'
+    CONFLICT: 'Conflict error'
 }
 
 class ErrorResponse extends Error {

@@ -66,7 +66,7 @@ class AccessService {
                 metedata: null
             }
         } catch (error) {
-            console.log(error)
+            console.log('Error sign up', error)
             return {
                 code: 'xxx',
                 message: error.message,
