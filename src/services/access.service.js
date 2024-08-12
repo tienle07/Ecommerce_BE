@@ -1,13 +1,13 @@
 const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("node:crypto");
-const { createTokenPair } = require("../auth/authUtils");
+const { createTokenPair, verifyJWT } = require("../auth/authUtils");
 const KeyTokenService = require("./keyToken.service");
 const { getInfoData } = require("../utils");
 const {
     BadRequestError,
-    ConflictRequestError,
     AuthFailureError,
+    ForbiddenError,
 } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
 
@@ -20,12 +20,60 @@ const RoleShop = {
 
 class AccessService {
     /*
-      1 - check email in dbs
-      2 - match password
-      3 - create access token vs refresh token
-      4 - generate tokens
-      5 - get data return login
-      */
+       check token used?
+    */
+    static handlerRefreshToken = async (refreshToken) => {
+        // check xem token nay da được sử dụng hay chưa
+        const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+        if (foundToken) {
+            // decode xem la ai
+            const { userId, email } = await verifyJWT(refreshToken, foundToken.privateKey);
+            console.log({ userId, email });
+
+            await KeyTokenService.deleteKeyById(userId)
+            throw new ForbiddenError(`Something wrong happened || Please re-login`);
+        }
+        //NO
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+        if (!holderToken) throw new AuthFailureError('Shop not registered');
+        // Yes, Verify the token
+        const { userId, email } = await verifyJWT(refreshToken, holderToken.privateKey);
+        console.log('[2]--', { userId, email });
+        const foundShop = await findByEmail({ email });
+        if (!foundShop) throw new AuthFailureError('Shop not registered');
+
+        // Tạo token mới
+        const tokens = await createTokenPair(
+            { userId, email },
+            holderToken.publicKey,
+            holderToken.privateKey
+        );
+
+        // update token 
+        await holderToken.updateOne({
+            $set: {
+                refreshToken: tokens.refreshToken,
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken
+            }
+        });
+
+        return {
+            user: { userId, email },
+            tokens
+        }
+
+
+    };
+
+    /*
+        1 - check email in dbs
+        2 - match password
+        3 - create access token vs refresh token
+        4 - generate tokens
+        5 - get data return login
+        */
     static login = async ({ email, password, refreshToken = null }) => {
         const foundShop = await findByEmail({ email });
         //1.
@@ -65,7 +113,6 @@ class AccessService {
         console.log({ delKey });
         return delKey;
     };
-
 
     static signUp = async ({ name, email, password }) => {
         try {
