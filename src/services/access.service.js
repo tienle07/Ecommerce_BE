@@ -22,6 +22,45 @@ class AccessService {
     /*
        check token used?
     */
+    static handlerRefreshTokenV2 = async ({ keyStore, user, refreshToken }) => {
+
+        const { userId, email } = user;
+
+        if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+            await KeyTokenService.deleteKeyById(userId)
+            throw new ForbiddenError(`Something wrong happened || Please re-login`);
+        }
+
+        if (keyStore.refreshToken !== refreshToken)
+            throw new AuthFailureError('Shop not registered');
+
+        const foundShop = await findByEmail({ email });
+
+        if (!foundShop) throw new AuthFailureError('Shop not registered');
+
+        // Tạo token mới
+        const tokens = await createTokenPair(
+            { userId, email },
+            keyStore.publicKey,
+            keyStore.privateKey
+        );
+
+        // update token 
+        await keyStore.updateOne({
+            $set: {
+                refreshToken: tokens.refreshToken,
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken
+            }
+        });
+
+        return {
+            user,
+            tokens
+        }
+    };
+
     static handlerRefreshToken = async (refreshToken) => {
         // check xem token nay da được sử dụng hay chưa
         const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
@@ -38,7 +77,6 @@ class AccessService {
         if (!holderToken) throw new AuthFailureError('Shop not registered');
         // Yes, Verify the token
         const { userId, email } = await verifyJWT(refreshToken, holderToken.privateKey);
-        console.log('[2]--', { userId, email });
         const foundShop = await findByEmail({ email });
         if (!foundShop) throw new AuthFailureError('Shop not registered');
 
