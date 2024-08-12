@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose'); // Erase if already required
+const { Schema, model } = require("mongoose"); // Erase if already required
 
 const DOCUMENT_NAME = "Key";
 const COLLECTION_NAME = "Keys";
@@ -9,7 +9,7 @@ var keyTokenSchema = new Schema(
         user: {
             type: Schema.Types.ObjectId,
             required: true,
-            ref: 'Shop',
+            ref: "Shop",
         },
         privateKey: {
             type: String,
@@ -21,17 +21,17 @@ var keyTokenSchema = new Schema(
         },
         refreshTokensUsed: {
             type: Array,
-            default: [] // refresh token đã được sử dụng
+            default: [], // refresh token đã được sử dụng
         },
         refreshToken: {
             type: String,
             required: true,
         },
-
-    }, {
-    collection: COLLECTION_NAME,
-    timestamps: true,
-}
+    },
+    {
+        collection: COLLECTION_NAME,
+        timestamps: true,
+    }
 );
 
 //Export the model
