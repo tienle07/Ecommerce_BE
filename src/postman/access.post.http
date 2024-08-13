@@ -12,14 +12,4 @@ x-api-key: a47ff6f5a89645e7b0a594ef7113190898730127d0bde586def0c85aa77b2d7f7bacd
     "password": "abc123"
 }
 
-### login
-POST {{url_dev}}/shop/login
-
-Content-Type: application/json
-x-api-key: 09a267d98457a11003c455cd41db5b3d7d5e9a6bcb73f690eb3bc44e23e33a9f6adf508b40e0ecd2b18463592da894f68cad14d784359142ee169112bd81245a
-
-{
-    "email": "shoptipjs10@gmail.com",
-    "password": "abc123"
-}
 

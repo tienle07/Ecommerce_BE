@@ -8,7 +8,7 @@ class ProductFactory {
     static async createProduct(type, payload) {
         switch (type) {
             case 'Electronics':
-                return new Electronics(payload);
+                return new Electronics(payload).createProduct();
             case 'Clothing':
                 return new Clothing(payload).createProduct();
             default:
@@ -40,18 +40,18 @@ class Product {
 
     //create new product
 
-    async createProduct() {
-        return await product.create(this);
+    async createProduct(product_id) {
+        return await product.create({ ...this, _id: product_id });
     }
 }
 
 class Clothing extends Product {
     async createProduct() {
         const newClothing = await clothing.create(this.product_attributes)
-        if (!newClothing) throw new BadRequestError('create new Clothing error');
+        if (!newClothing) throw new BadRequestError('Create new Clothing error');
 
         const newProduct = await super.createProduct();
-        if (!newProduct) throw new BadRequestError('create new Product error');
+        if (!newProduct) throw new BadRequestError('Create new Product error');
 
         return newProduct;
     }
@@ -59,10 +59,13 @@ class Clothing extends Product {
 
 class Electronics extends Product {
     async createProduct() {
-        const newElectronic = await electronic.create(this.product_attributes)
+        const newElectronic = await electronic.create({
+            ...this.product_attributes,
+            product_shop: this.product_shop
+        })
         if (!newElectronic) throw new BadRequestError('create new Clothing error');
 
-        const newProduct = await super.createProduct();
+        const newProduct = await super.createProduct(newElectronic._id);
         if (!newProduct) throw new BadRequestError('create new Product error');
 
         return newProduct;
