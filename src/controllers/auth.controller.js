@@ -1,5 +1,5 @@
 const { CREATED, SuccessResponse } = require("../core/success.response");
-const AccessService = require('../services/access.service')
+const AccessService = require('../services/auth.service')
 
 class AccessController {
 

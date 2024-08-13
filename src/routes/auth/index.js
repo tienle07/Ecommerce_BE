@@ -1,5 +1,5 @@
 const express = require('express');
-const accessController = require('../../controllers/access.controller');
+const accessController = require('../../controllers/auth.controller');
 const { authentication, authenticationV2 } = require('../../auth/authUtils');
 const asyncHandler = require('../../helpers/asyncHandler');
 
