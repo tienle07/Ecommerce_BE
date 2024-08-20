@@ -1,10 +1,12 @@
 require('dotenv').config();
 const compression = require('compression');
-const bodyparser = require("body-parser");
 const { default: helmet } = require('helmet');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocs = require('./configs/swaggerOptions');
 const morgan = require('morgan');
 const express = require('express');
 const app = express();
+
 
 // init middleware
 app.use(morgan("dev"));
@@ -16,6 +18,14 @@ app.use(express.urlencoded({
 }));
 
 
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
+    explorer: true
+}));
 // init db
 require('./dbs/init.mongodb');
 
